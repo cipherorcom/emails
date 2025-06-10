@@ -2,26 +2,23 @@ name = "emails"
 main = "src/index.js"
 compatibility_date = "2023-06-08"
 
-# KV 命名空间用于存储邮件（使用本地模拟的KV命名空间）
+# 本地开发环境配置（仅用于本地测试）
 [[kv_namespaces]]
 binding = "EMAIL_STORE"
 preview_id = "email-store-dev"
-id = "email-store"
 
-# R2 存储桶用于存储邮件附件（使用本地模拟的R2存储桶）
 [[r2_buckets]]
 binding = "EMAIL_ATTACHMENTS"
-bucket_name = "email-attachments"
 preview_bucket_name = "email-attachments-dev"
 
 # 环境变量设置
 [vars]
 # Resend 邮件服务的 API Key
-RESEND_API_KEY = "" # 将在.dev.vars中设置
+RESEND_API_KEY = "" # 部署后在Cloudflare控制台设置
 # 登录认证信息
-AUTH_USER = ""      # 将在.dev.vars中设置
-AUTH_PASSWORD = ""  # 将在.dev.vars中设置
-AUTH_EMAIL = ""  # 将在.dev.vars中设置
+AUTH_USER = ""      # 部署后在Cloudflare控制台设置
+AUTH_PASSWORD = ""  # 部署后在Cloudflare控制台设置
+AUTH_EMAIL = ""     # 部署后在Cloudflare控制台设置
 # 默认设置
 DEFAULT_THEME = "light" # 默认主题：light或dark
 DEFAULT_LANG = "zh-CN"  # 默认语言：zh-CN或en-US
