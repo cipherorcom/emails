@@ -47,7 +47,7 @@
 
 ## Quick Deploy
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOUR_USERNAME/email-system)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cipherorcom/emails)
 
 You can use the "Deploy to Cloudflare" button above to deploy this project to your Cloudflare account with one click. During deployment, you'll need to:
 

@@ -42,7 +42,7 @@
 
 ## 一键部署
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOUR_USERNAME/email-system)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cipherorcom/emails)
 
 你可以使用上方的"Deploy to Cloudflare"按钮一键部署此项目到你的 Cloudflare 账户。部署过程中，你需要：
 
