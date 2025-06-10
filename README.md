@@ -53,17 +53,18 @@ You can use the "Deploy to Cloudflare" button above to deploy this project to yo
 
 1. Get a [Resend API Key](https://resend.com)
 2. Login to your Cloudflare account
-3. Create the necessary KV namespace `email-store` and R2 bucket `email-attachments`
-4. Set up environment variables:
+3. Set up environment variables:
 
    | Variable | Value | Description |
    |----------|-------|-------------|
+   | EMAIL_STORE | `email-store` | KV namespace binding |
+   | EMAIL_ATTACHMENTS | `email-attachments` | R2 bucket binding |
    | RESEND_API_KEY | string | API Key from Resend |
    | AUTH_USER | string | Login username |
    | AUTH_PASSWORD | string | Login password |
    | AUTH_EMAIL | `admin <admin@example.com>` \| `admin@example.com` | Default sender email |
-   | EMAIL_STORE | `email-store` | KV namespace binding |
-   | EMAIL_ATTACHMENTS | `email-attachments` | R2 bucket binding |
+
+![Deploy](Deploy.png)
 
 ## Project Setup
 

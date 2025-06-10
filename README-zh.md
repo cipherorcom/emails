@@ -47,17 +47,18 @@
 你可以使用上方的"Deploy to Cloudflare"按钮一键部署此项目到你的 Cloudflare 账户。部署过程中，你需要：
 
 1. 申请 [Resend Key](https://resend.com)
-2. 登录你的 Cloudflare 账户
-3. 创建必要的 KV 命名空间 `email-store` 和 R2 存储桶 `email-attachments` 
-4. 设置环境变量
+2. 登录你的 Cloudflare 账户 
+3. 设置环境变量
    |变量名|值|说明|
    |------|-----|-----|
+   |EMAIL_STORE|`email-store`|绑定KV命名空间|
+   |EMAIL_ATTACHMENTS|`email-attachments`|绑定R2存储桶|
    |RESEND_API_KEY|string|在 Resend 申请的API Key|
    |AUTH_USER|string|登录的用户名|
    |AUTH_PASSWORD|string|登录的密码|
    |AUTH_EMAIL|`admin <admin@example.com>` \| `admin@example.com`|默认发件人|
-   |EMAIL_STORE|`email-store`|绑定KV命名空间|
-   |EMAIL_ATTACHMENTS|`email-attachments`|绑定R2存储桶|
+
+![Deploy](Deploy.png)
 
 ## 项目设置
 
