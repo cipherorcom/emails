@@ -3,13 +3,13 @@ main = "src/index.js"
 compatibility_date = "2023-06-08"
 
 # 本地开发环境配置（仅用于本地测试）
-[[kv_namespaces]]
-binding = "EMAIL_STORE"
-preview_id = "email-store-dev"
+# [[kv_namespaces]]
+# binding = "EMAIL_STORE"
+# preview_id = "email-store-dev"
 
-[[r2_buckets]]
-binding = "EMAIL_ATTACHMENTS"
-preview_bucket_name = "email-attachments-dev"
+# [[r2_buckets]]
+# binding = "EMAIL_ATTACHMENTS"
+# preview_bucket_name = "email-attachments-dev"
 
 # 环境变量设置
 [vars]
