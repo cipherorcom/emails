@@ -18,6 +18,7 @@ export default {
   nav_compose: 'Compose',
   nav_welcome: 'Welcome',
   nav_logout: 'Logout',
+  nav_diagnostic: 'Diagnostics',
   
   // Login
   login_title: 'Login',
@@ -73,51 +74,15 @@ export default {
   attachment_size_error: 'File {filename} is too large, exceeds 10MB limit',
   attachment_delete_error: 'Failed to delete attachment',
   
-  // Settings
-  settings_title: 'Settings',
-  settings_theme: 'Theme',
-  settings_theme_light: 'Light',
-  settings_theme_dark: 'Dark',
-  settings_theme_system: 'System',
-  settings_language: 'Language',
-  settings_language_zh: 'Chinese',
-  settings_language_en: 'English',
-  settings_save_success: 'Settings saved',
-  settings_save_error: 'Failed to save settings',
-  
-  // Error messages
-  error_unauthorized: 'Unauthorized access',
-  error_server: 'Server error',
-  error_network: 'Network error',
-  error_unknown: 'Unknown error',
-  
-  // Email details page
-  email_detail_title: 'Email Details',
-  email_detail_from: 'From',
-  email_detail_to: 'To',
-  email_detail_subject: 'Subject',
-  email_detail_date: 'Date',
-  email_detail_content: 'Content',
-  email_detail_attachments: 'Attachments',
-  email_detail_not_found: 'Email not found',
-  email_detail_back: 'Back to list',
-  email_detail_reply: 'Reply',
-  email_detail_forward: 'Forward',
-  email_detail_delete: 'Delete',
-  
-  // Quick reply
-  quick_reply: 'Quick Reply',
-  quick_reply_placeholder: 'Enter your reply...',
-  quick_reply_send: 'Send Reply',
-  quick_reply_cancel: 'Cancel',
-  quick_reply_success: 'Reply sent',
-  quick_reply_error: 'Failed to send reply',
-  
-  // 分页
-  pagination_showing: 'Showing',
-  pagination_page: 'Page',
-  pagination_of: 'of',
-  pagination_total: 'Total',
-  pagination_prev: 'Previous',
-  pagination_next: 'Next',
-}; 
+  // Diagnostic page translations
+  diagnostic_title: 'System Diagnostics',
+  diagnostic_env_title: 'Environment Configuration Check',
+  diagnostic_check_env: 'Check Environment',
+  diagnostic_upload_title: 'Attachment Upload Test',
+  diagnostic_test_upload: 'Test Upload',
+  diagnostic_guide_title: 'Usage Guide',
+  diagnostic_guide_1: '• Environment check displays the configuration status of KV storage, R2 storage, and API keys',
+  diagnostic_guide_2: '• Attachment upload test verifies the complete process of uploading files to R2 storage',
+  diagnostic_guide_3: '• If tests fail, please check Cloudflare Workers binding configuration',
+  diagnostic_guide_4: '• Test files will be automatically deleted after testing completes'
+};

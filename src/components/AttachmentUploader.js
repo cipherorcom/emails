@@ -3,99 +3,29 @@ import { html } from 'hono/html';
 import { t } from '../i18n';
 
 // 渲染附件上传组件
-export function renderAttachmentUploader(currentLang = 'zh-CN') {
+export function renderAttachmentUploader() {
   return html`
     <div class="attachment-uploader border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-4">
       <div class="text-center py-4" id="drop-area">
         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
           <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400" data-i18n="attachment_drop">${t('attachment_drop', currentLang)}</p>
-        <p class="text-xs text-gray-500 dark:text-gray-500" data-i18n="attachment_max_size">${t('attachment_max_size', currentLang)}</p>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">${t('attachment_drop')}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-500">${t('attachment_max_size')}</p>
         <input id="file-input" type="file" class="hidden" multiple />
-        <button type="button" id="browse-files" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" data-i18n="attachment_add">
-          ${t('attachment_add', currentLang)}
+        <button type="button" id="browse-files" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          ${t('attachment_add')}
         </button>
       </div>
       
       <div id="attachments-list" class="mt-4 space-y-2 hidden">
-        <h3 class="font-medium text-gray-900 dark:text-white" data-i18n="compose_attachments">${t('compose_attachments', currentLang)}</h3>
+        <h3 class="font-medium text-gray-900 dark:text-white">${t('compose_attachments')}</h3>
         <div id="attachments-container" class="space-y-2"></div>
       </div>
     </div>
     
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        // 工具函数
-        function formatFileSize(bytes) {
-          if (bytes === 0) return '0 Bytes';
-          
-          const k = 1024;
-          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-          const i = Math.floor(Math.log(bytes) / Math.log(k));
-          
-          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function getFileTypeIcon(filename) {
-          const extension = filename.split('.').pop().toLowerCase();
-          
-          const iconMap = {
-            // 图片
-            'jpg': '🖼️',
-            'jpeg': '🖼️',
-            'png': '🖼️',
-            'gif': '🖼️',
-            'svg': '🖼️',
-            'webp': '🖼️',
-            
-            // 文档
-            'pdf': '📄',
-            'doc': '📝',
-            'docx': '📝',
-            'txt': '📝',
-            'rtf': '📝',
-            
-            // 表格
-            'xls': '📊',
-            'xlsx': '📊',
-            'csv': '📊',
-            
-            // 演示文稿
-            'ppt': '📊',
-            'pptx': '📊',
-            
-            // 压缩文件
-            'zip': '📦',
-            'rar': '📦',
-            '7z': '📦',
-            'tar': '📦',
-            'gz': '📦',
-            
-            // 代码
-            'js': '📜',
-            'html': '📜',
-            'css': '📜',
-            'json': '📜',
-            'xml': '📜',
-            
-            // 音频
-            'mp3': '🎵',
-            'wav': '🎵',
-            'flac': '🎵',
-            'aac': '🎵',
-            
-            // 视频
-            'mp4': '🎬',
-            'avi': '🎬',
-            'mkv': '🎬',
-            'mov': '🎬',
-            'wmv': '🎬'
-          };
-          
-          return iconMap[extension] || '📎';
-        }
-
         const dropArea = document.getElementById('drop-area');
         const fileInput = document.getElementById('file-input');
         const browseButton = document.getElementById('browse-files');
@@ -174,6 +104,12 @@ export function renderAttachmentUploader(currentLang = 'zh-CN') {
             return;
           }
           
+          console.log('开始上传文件:', {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          });
+          
           // 创建附件元素
           const attachmentId = 'attachment-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
           const attachmentEl = createAttachmentElement(attachmentId, file);
@@ -184,19 +120,40 @@ export function renderAttachmentUploader(currentLang = 'zh-CN') {
             const formData = new FormData();
             formData.append('file', file);
             
+            console.log('发送上传请求到 /api/attachments/upload');
+            
             // 发送上传请求
             const response = await fetch('/api/attachments/upload', {
               method: 'POST',
               body: formData
             });
             
+            console.log('收到响应:', {
+              status: response.status,
+              statusText: response.statusText,
+              headers: Object.fromEntries(response.headers.entries())
+            });
+            
             if (!response.ok) {
-              const errorMsg = window.i18n ? window.i18n.t('attachment_upload_error') : '上传失败';
-              throw new Error(errorMsg);
+              // 尝试获取错误详情
+              let errorData;
+              try {
+                errorData = await response.json();
+              } catch (e) {
+                errorData = { message: '服务器响应格式错误' };
+              }
+              
+              console.error('上传失败，服务器响应:', errorData);
+              throw new Error(errorData.message || 'HTTP ' + response.status + ': ' + response.statusText);
             }
             
             // 获取上传结果
             const result = await response.json();
+            console.log('上传成功，结果:', result);
+            
+            if (!result.success) {
+              throw new Error(result.message || '上传失败');
+            }
             
             // 更新附件状态
             updateAttachmentStatus(attachmentId, true, result.id);
@@ -212,9 +169,24 @@ export function renderAttachmentUploader(currentLang = 'zh-CN') {
             
             // 更新隐藏的附件输入字段
             updateAttachmentsInput();
+            
+            // 显示成功提示
+            if (window.toast) {
+              const successMsg = window.i18n ? window.i18n.t('attachment_upload_success') : '上传成功';
+              window.toast.success(file.name + ': ' + successMsg);
+            }
+            
           } catch (error) {
-            console.error('上传失败:', error);
+            console.error('上传失败详情:', error);
             updateAttachmentStatus(attachmentId, false);
+            
+            // 显示错误提示
+            const errorMsg = error.message || (window.i18n ? window.i18n.t('attachment_upload_error') : '上传失败');
+            if (window.toast) {
+              window.toast.error(file.name + ': ' + errorMsg);
+            } else {
+              alert(file.name + ': ' + errorMsg);
+            }
           }
         }
         
@@ -301,8 +273,7 @@ export function renderAttachmentUploader(currentLang = 'zh-CN') {
                 attachments.splice(index, 1);
               }
             } catch (error) {
-              const errorMsg = window.i18n ? window.i18n.t('attachment_delete_error') : '删除附件失败';
-              console.error(errorMsg + ':', error);
+              console.error('删除附件失败:', error);
             }
           }
           

@@ -4,6 +4,7 @@ import { allTranslations, getCurrentLanguage, t } from './i18n';
 import { Hono } from 'hono';
 import { Resend } from 'resend';
 import attachmentsApi from './api/attachments';
+import diagnosticApi from './api/diagnostic';
 import { html } from 'hono/html';
 import { renderAttachmentUploader } from './components/AttachmentUploader';
 import { renderSettingsPanel } from './components/SettingsPanel';
@@ -239,6 +240,7 @@ app.post('/api/logout', async (c) => {
 // 注册API路由
 app.route('/api/settings', settingsApi);
 app.route('/api/attachments', attachmentsApi);
+app.route('/api/diagnostic', diagnosticApi);
 
 // 通用页面头部
 function renderHeader(user, currentPage, request) {
@@ -262,6 +264,10 @@ function renderHeader(user, currentPage, request) {
   const composeClass = currentPage === 'compose' 
     ? `${navLinkBaseClass} bg-blue-600 text-white` 
     : `${navLinkBaseClass} text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-blue-600 dark:hover:text-white`;
+
+  const diagnosticClass = currentPage === 'diagnostic' 
+    ? `${navLinkBaseClass} bg-blue-600 text-white` 
+    : `${navLinkBaseClass} text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-blue-600 dark:hover:text-white`;
   
   return html`
     <div class="container mx-auto px-4 mb-8">
@@ -273,6 +279,7 @@ function renderHeader(user, currentPage, request) {
             <a href="/" class="${inboxClass} nav-link" data-i18n="nav_inbox">${t('nav_inbox', currentLang)}</a>
             <a href="/sent" class="${sentClass} nav-link" data-i18n="nav_sent">${t('nav_sent', currentLang)}</a>
             <a href="/compose" class="${composeClass} nav-link" data-i18n="nav_compose">${t('nav_compose', currentLang)}</a>
+            <a href="/diagnostic" class="${diagnosticClass} nav-link" data-i18n="nav_diagnostic">${t('nav_diagnostic', currentLang)}</a>
           </nav>
           
           <div class="flex items-center space-x-4">
@@ -586,6 +593,12 @@ app.get('/email/:id', authMiddleware, (c) => {
   const user = c.get('user');
   const emailId = c.req.param('id');
   return c.html(renderEmailDetailPage(user, emailId, c.req));
+});
+
+// 诊断页面
+app.get('/diagnostic', authMiddleware, (c) => {
+  const user = c.get('user');
+  return c.html(renderDiagnosticPage(user, c.req));
 });
 
 // 登录页面
@@ -1127,10 +1140,7 @@ function renderComposePage(user, request) {
           </div>
           
           <div>
-            <div class="flex items-center mb-2">
-              <label for="html" class="block mb-1 font-medium dark:text-white" data-i18n="compose_html">${t('compose_html', currentLang)}</label>
-              <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">(${t('optional', currentLang) || '可选'})</span>
-            </div>
+            <label for="html" class="block mb-1 font-medium dark:text-white" data-i18n="compose_html">${t('compose_html', currentLang)}</label>
             <textarea id="html" name="html" placeholder="<p>${t('compose_html', currentLang)}</p>" class="w-full px-4 py-2 border rounded-lg h-48"></textarea>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="compose_html_tip">${t('compose_html_tip', currentLang)}</p>
           </div>
@@ -1414,6 +1424,196 @@ function renderEmailDetailPage(user, emailId, request) {
   `;
   
   return renderPageTemplate(t('app_name', currentLang) + ' - ' + t('email_detail_title', currentLang), content, user, null, request);
+}
+
+// 诊断页面模板
+function renderDiagnosticPage(user, request) {
+  const currentLang = getCurrentLanguage(request);
+  const content = html`
+    <div class="container mx-auto px-4">
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white" data-i18n="diagnostic_title">系统诊断</h2>
+        
+        <!-- 环境信息检查 -->
+        <div class="mb-8">
+          <h3 class="text-lg font-medium mb-3 dark:text-white" data-i18n="diagnostic_env_title">环境配置检查</h3>
+          <button id="check-env-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4" data-i18n="diagnostic_check_env">检查环境</button>
+          <div id="env-results" class="hidden">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <pre id="env-output" class="text-sm dark:text-gray-300 whitespace-pre-wrap"></pre>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 附件上传测试 -->
+        <div class="mb-8">
+          <h3 class="text-lg font-medium mb-3 dark:text-white" data-i18n="diagnostic_upload_title">附件上传测试</h3>
+          <div class="mb-4">
+            <input type="file" id="test-file-input" class="block w-full text-sm text-gray-500 dark:text-gray-400
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300">
+          </div>
+          <button id="test-upload-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mb-4" data-i18n="diagnostic_test_upload">测试上传</button>
+          <div id="upload-results" class="hidden">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <pre id="upload-output" class="text-sm dark:text-gray-300 whitespace-pre-wrap"></pre>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 操作指南 -->
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+          <h4 class="text-md font-medium text-yellow-800 dark:text-yellow-200 mb-2" data-i18n="diagnostic_guide_title">使用指南</h4>
+          <ul class="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+            <li data-i18n="diagnostic_guide_1">• 环境检查将显示 KV 存储、R2 存储和 API 密钥的配置状态</li>
+            <li data-i18n="diagnostic_guide_2">• 附件上传测试将验证文件上传到 R2 存储的完整流程</li>
+            <li data-i18n="diagnostic_guide_3">• 如果测试失败，请检查 Cloudflare Workers 的绑定配置</li>
+            <li data-i18n="diagnostic_guide_4">• 测试文件会在测试完成后自动删除</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const checkEnvBtn = document.getElementById('check-env-btn');
+        const envResults = document.getElementById('env-results');
+        const envOutput = document.getElementById('env-output');
+        
+        const testUploadBtn = document.getElementById('test-upload-btn');
+        const testFileInput = document.getElementById('test-file-input');
+        const uploadResults = document.getElementById('upload-results');
+        const uploadOutput = document.getElementById('upload-output');
+        
+        // 环境检查
+
+        checkEnvBtn.addEventListener('click', async () => {
+          try {
+            checkEnvBtn.disabled = true;
+            checkEnvBtn.textContent = '检查中...';
+            
+            const response = await fetch('/api/diagnostic/env');
+            const result = await response.json();
+            
+            envOutput.textContent = JSON.stringify(result, null, 2);
+            envResults.classList.remove('hidden');
+            
+            // 显示友好的状态信息
+            let statusMessage = '环境检查结果:\\n\\n';
+            statusMessage += \`KV 存储 (EMAIL_STORE): \${result.hasEmailStore ? '✅ 已配置' : '❌ 未配置'}\\n\`;
+            statusMessage += \`R2 存储 (EMAIL_ATTACHMENTS): \${result.hasEmailAttachments ? '✅ 已配置' : '❌ 未配置'}\\n\`;
+            statusMessage += \`Resend API Key: \${result.hasResendApiKey ? '✅ 已配置' : '❌ 未配置'}\\n\\n\`;
+            
+            if (result.kvTest) {
+              statusMessage += \`KV 存储测试: \${result.kvTest.success ? '✅ 正常' : '❌ 失败'}\\n\`;
+              if (!result.kvTest.success && result.kvTest.error) {
+                statusMessage += \`  错误: \${result.kvTest.error}\\n\`;
+              }
+            }
+            
+            if (result.r2Test) {
+              statusMessage += \`R2 存储测试: \${result.r2Test.success ? '✅ 正常' : '❌ 失败'}\\n\`;
+              if (!result.r2Test.success && result.r2Test.error) {
+                statusMessage += \`  错误: \${result.r2Test.error}\\n\`;
+              }
+            }
+            
+            statusMessage += '\\n' + '详细信息:' + '\\n' + JSON.stringify(result, null, 2);
+            envOutput.textContent = statusMessage;
+            
+          } catch (error) {
+            envOutput.textContent = \`检查失败: \${error.message}\\n\\n详细错误:\\n\${error.stack || error}\`;
+            envResults.classList.remove('hidden');
+          } finally {
+            checkEnvBtn.disabled = false;
+            checkEnvBtn.textContent = '检查环境';
+          }
+        });
+        
+        // 附件上传测试
+        testUploadBtn.addEventListener('click', async () => {
+          const file = testFileInput.files[0];
+          if (!file) {
+            if (window.toast) {
+              window.toast.warning('请先选择要测试的文件');
+            } else {
+              alert('请先选择要测试的文件');
+            }
+            return;
+          }
+          
+          try {
+            testUploadBtn.disabled = true;
+            testUploadBtn.textContent = '测试中...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const response = await fetch('/api/diagnostic/upload-test', {
+              method: 'POST',
+              body: formData
+            });
+            
+            const result = await response.json();
+            
+            // 显示友好的状态信息
+            let statusMessage = '附件上传测试结果:\\n\\n';
+            statusMessage += \`文件信息:\\n\`;
+            statusMessage += \`  名称: \${result.file ? result.file.name : '无'}\\n\`;
+            statusMessage += \`  大小: \${result.file ? result.file.size + ' bytes' : '无'}\\n\`;
+            statusMessage += \`  类型: \${result.file ? result.file.type : '无'}\\n\\n\`;
+            
+            if (result.file) {
+              statusMessage += \`文件读取: \${result.file.readSuccess ? '✅ 成功' : '❌ 失败'}\\n\`;
+              if (!result.file.readSuccess && result.file.readError) {
+                statusMessage += \`  错误: \${result.file.readError}\\n\`;
+              }
+            }
+            
+            if (result.upload) {
+              statusMessage += \`R2 上传: \${result.upload.success ? '✅ 成功' : '❌ 失败'}\\n\`;
+              if (result.upload.success) {
+                statusMessage += \`  上传文件名: \${result.upload.filename}\\n\`;
+                statusMessage += \`  上传大小: \${result.upload.uploadedSize} bytes\\n\`;
+              } else if (result.upload.error) {
+                statusMessage += \`  错误: \${result.upload.error}\\n\`;
+              }
+            }
+            
+            statusMessage += '\\n' + '详细信息:' + '\\n' + JSON.stringify(result, null, 2);
+            uploadOutput.textContent = statusMessage;
+            uploadResults.classList.remove('hidden');
+            
+            if (result.upload && result.upload.success) {
+              if (window.toast) {
+                window.toast.success('附件上传测试成功！');
+              }
+            } else {
+              if (window.toast) {
+                window.toast.error('附件上传测试失败，请检查配置');
+              }
+            }
+            
+          } catch (error) {
+            uploadOutput.textContent = \`测试失败: \${error.message}\\n\\n详细错误:\\n\${error.stack || error}\`;
+            uploadResults.classList.remove('hidden');
+            
+            if (window.toast) {
+              window.toast.error('附件上传测试失败: ' + error.message);
+            }
+          } finally {
+            testUploadBtn.disabled = false;
+            testUploadBtn.textContent = '测试上传';
+          }
+        });
+      });
+    </script>
+  `;
+  
+  return renderPageTemplate(t('app_name', currentLang) + ' - 系统诊断', content, user, 'diagnostic', request);
 }
 
 // 登录页面模板
@@ -1860,7 +2060,8 @@ function renderPageTemplate(title, content, user = null, currentPage = null, req
         /* 更具体的导航栏按钮悬停样式 */
         .dark nav a[data-i18n="nav_inbox"]:hover,
         .dark nav a[data-i18n="nav_sent"]:hover,
-        .dark nav a[data-i18n="nav_compose"]:hover {
+        .dark nav a[data-i18n="nav_compose"]:hover,
+        .dark nav a[data-i18n="nav_diagnostic"]:hover {
           background-color: #2563eb !important; /* bg-blue-600 */
           color: #ffffff !important; /* text-white */
         }
@@ -1896,7 +2097,7 @@ function renderPageTemplate(title, content, user = null, currentPage = null, req
                 iconSvg = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
                 break;
               case 'warning':
-                iconSvg = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                iconSvg = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414 0z" clip-rule="evenodd"></path>';
                 break;
               default:
                 iconSvg = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';

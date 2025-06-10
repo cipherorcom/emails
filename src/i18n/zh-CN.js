@@ -18,6 +18,7 @@ export default {
   nav_compose: '写邮件',
   nav_welcome: '欢迎',
   nav_logout: '退出',
+  nav_diagnostic: '系统诊断',
   
   // 登录
   login_title: '登录',
@@ -73,51 +74,15 @@ export default {
   attachment_size_error: '文件 {filename} 太大，超过了10MB限制',
   attachment_delete_error: '删除附件失败',
   
-  // 设置
-  settings_title: '设置',
-  settings_theme: '主题',
-  settings_theme_light: '浅色',
-  settings_theme_dark: '深色',
-  settings_theme_system: '跟随系统',
-  settings_language: '语言',
-  settings_language_zh: '中文',
-  settings_language_en: '英文',
-  settings_save_success: '设置已保存',
-  settings_save_error: '保存设置失败',
-  
-  // 错误信息
-  error_unauthorized: '未授权访问',
-  error_server: '服务器错误',
-  error_network: '网络错误',
-  error_unknown: '未知错误',
-  
-  // 邮件详情页面
-  email_detail_title: '邮件详情',
-  email_detail_from: '发件人',
-  email_detail_to: '收件人',
-  email_detail_subject: '主题',
-  email_detail_date: '日期',
-  email_detail_content: '内容',
-  email_detail_attachments: '附件',
-  email_detail_not_found: '未找到邮件',
-  email_detail_back: '返回列表',
-  email_detail_reply: '回复',
-  email_detail_forward: '转发',
-  email_detail_delete: '删除',
-  
-  // 快捷回复
-  quick_reply: '快捷回复',
-  quick_reply_placeholder: '输入回复内容...',
-  quick_reply_send: '发送回复',
-  quick_reply_cancel: '取消',
-  quick_reply_success: '回复已发送',
-  quick_reply_error: '回复发送失败',
-  
-  // 分页
-  pagination_showing: '显示',
-  pagination_page: '页',
-  pagination_of: '/',
-  pagination_total: '共',
-  pagination_prev: '上一页',
-  pagination_next: '下一页',
-}; 
+  // 诊断页面翻译
+  diagnostic_title: '系统诊断',
+  diagnostic_env_title: '环境配置检查',
+  diagnostic_check_env: '检查环境',
+  diagnostic_upload_title: '附件上传测试',
+  diagnostic_test_upload: '测试上传',
+  diagnostic_guide_title: '使用指南',
+  diagnostic_guide_1: '• 环境检查将显示 KV 存储、R2 存储和 API 密钥的配置状态',
+  diagnostic_guide_2: '• 附件上传测试将验证文件上传到 R2 存储的完整流程',
+  diagnostic_guide_3: '• 如果测试失败，请检查 Cloudflare Workers 的绑定配置',
+  diagnostic_guide_4: '• 测试文件会在测试完成后自动删除'
+};
