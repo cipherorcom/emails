@@ -26,6 +26,76 @@ export function renderAttachmentUploader(currentLang = 'zh-CN') {
     
     <script>
       document.addEventListener('DOMContentLoaded', () => {
+        // 工具函数
+        function formatFileSize(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileTypeIcon(filename) {
+          const extension = filename.split('.').pop().toLowerCase();
+          
+          const iconMap = {
+            // 图片
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'png': '🖼️',
+            'gif': '🖼️',
+            'svg': '🖼️',
+            'webp': '🖼️',
+            
+            // 文档
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'txt': '📝',
+            'rtf': '📝',
+            
+            // 表格
+            'xls': '📊',
+            'xlsx': '📊',
+            'csv': '📊',
+            
+            // 演示文稿
+            'ppt': '📊',
+            'pptx': '📊',
+            
+            // 压缩文件
+            'zip': '📦',
+            'rar': '📦',
+            '7z': '📦',
+            'tar': '📦',
+            'gz': '📦',
+            
+            // 代码
+            'js': '📜',
+            'html': '📜',
+            'css': '📜',
+            'json': '📜',
+            'xml': '📜',
+            
+            // 音频
+            'mp3': '🎵',
+            'wav': '🎵',
+            'flac': '🎵',
+            'aac': '🎵',
+            
+            // 视频
+            'mp4': '🎬',
+            'avi': '🎬',
+            'mkv': '🎬',
+            'mov': '🎬',
+            'wmv': '🎬'
+          };
+          
+          return iconMap[extension] || '📎';
+        }
+
         const dropArea = document.getElementById('drop-area');
         const fileInput = document.getElementById('file-input');
         const browseButton = document.getElementById('browse-files');

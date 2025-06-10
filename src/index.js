@@ -1621,6 +1621,17 @@ function renderPageTemplate(title, content, user = null, currentPage = null, req
           background-color: #3b82f6 !important;
         }
         
+        /* 确保附件在深色模式下有正确的背景颜色 - 使用更高的优先级 */
+        .dark .bg-gray-50 {
+          background-color: #374151 !important; /* dark:bg-gray-800 equivalent */
+        }
+        
+        /* 附件悬停状态 */
+        .dark .bg-gray-50:hover,
+        .dark .hover\\:bg-gray-100:hover {
+          background-color: #4b5563 !important; /* dark:hover:bg-gray-700 equivalent */
+        }
+        
         /* 确保主页样式正确生效 */
         .container {
           max-width: 1200px !important;
